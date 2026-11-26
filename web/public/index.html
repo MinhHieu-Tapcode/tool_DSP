@@ -3,30 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bảng Điều Khiển Tool DSP — GSolution Auto</title>
+  <title>Tool DSP — GSolution Auto</title>
   <style>
     :root {
-      --bg: #f1f5f9;
+      --bg: #f7f8fa;
       --card: #ffffff;
-      --border: #e2e8f0;
+      --subtle: #f8fafc;
+      --border: #e5e7eb;
+      --border-strong: #d1d5db;
       --text: #0f172a;
+      --text-2: #475569;
       --muted: #64748b;
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
+      --ink: #0f172a;
+      --ink-hover: #1e293b;
       --green: #16a34a;
-      --green-bg: #dcfce7;
+      --green-soft: #ecfdf5;
       --green-text: #15803d;
       --red: #dc2626;
-      --red-bg: #fee2e2;
+      --red-soft: #fef2f2;
       --red-text: #b91c1c;
       --amber: #d97706;
-      --amber-bg: #fef3c7;
+      --amber-soft: #fffbeb;
       --amber-text: #b45309;
-      --blue-bg: #dbeafe;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
       --blue-text: #1d4ed8;
-      --slate-bg: #f1f5f9;
-      --shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
-      --radius: 14px;
+      --radius: 16px;
+      --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.03);
     }
     * { box-sizing: border-box; }
     body {
@@ -35,9 +38,63 @@
       background: var(--bg);
       color: var(--text);
       line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      font-variant-numeric: tabular-nums;
     }
     .hidden { display: none !important; }
-    .wrap { max-width: 1260px; margin: 0 auto; padding: 18px 16px 40px; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 20px 16px 44px; }
+
+    /* Buttons & Inputs */
+    button, .btn {
+      font: inherit;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 9px 14px;
+      font-size: 13.5px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-ink { background: var(--ink); color: #fff; }
+    .btn-ink:hover:not(:disabled) { background: var(--ink-hover); }
+    .btn-outline { background: #fff; color: var(--text); border-color: var(--border); }
+    .btn-outline:hover:not(:disabled) { background: var(--subtle); border-color: var(--border-strong); }
+    .btn-danger-soft { background: var(--red-soft); color: var(--red-text); border-color: #fecaca; }
+    .btn-danger-soft:hover:not(:disabled) { background: #fee2e2; }
+    .btn-sm { padding: 7px 11px; font-size: 12.5px; border-radius: 9px; }
+    .btn-xs { padding: 5px 10px; font-size: 12px; border-radius: 8px; }
+    .btn-icon { padding: 7px 9px; }
+
+    label.field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-2);
+      margin-bottom: 5px;
+    }
+    input[type="text"], input[type="password"], select {
+      width: 100%;
+      font: inherit;
+      font-size: 13.5px;
+      padding: 9px 11px;
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input:focus, select:focus {
+      border-color: var(--ink);
+      box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
+    }
 
     /* Login */
     .login-shell {
@@ -49,246 +106,379 @@
     }
     .login-card {
       width: 100%;
-      max-width: 420px;
+      max-width: 390px;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      border-radius: 18px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
       padding: 28px;
     }
-    .login-card h1 { margin: 0 0 6px; font-size: 21px; }
-    .login-card p { margin: 0 0 18px; color: var(--muted); font-size: 14px; }
+    .login-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 14px;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text);
+    }
+    .login-card h1 { margin: 0 0 6px; font-size: 20px; letter-spacing: -0.02em; }
+    .login-card p { margin: 0 0 18px; color: var(--muted); font-size: 13.5px; }
 
-    /* Header */
+    /* Topbar */
     .topbar {
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px 18px;
-      box-shadow: var(--shadow);
-      margin-bottom: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
     }
-    .brand { display: flex; flex-direction: column; gap: 2px; }
-    .brand h1 { margin: 0; font-size: 19px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-    .brand .sub { font-size: 13px; color: var(--muted); }
-    .top-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: var(--ink);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .brand-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
     .clock-pill {
       font-size: 12.5px;
-      color: #334155;
-      background: var(--slate-bg);
+      color: var(--text-2);
+      background: var(--card);
       border: 1px solid var(--border);
       border-radius: 999px;
       padding: 6px 12px;
       font-weight: 500;
     }
 
-    /* Buttons & Inputs */
-    button, .btn {
-      font: inherit;
-      cursor: pointer;
+    /* Alert / Toast */
+    .alert {
+      border-radius: 11px;
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-bottom: 14px;
       border: 1px solid transparent;
-      border-radius: 9px;
-      padding: 8px 13px;
+      font-weight: 500;
+    }
+    .alert-err { background: var(--red-soft); color: var(--red-text); border-color: #fecaca; }
+    .alert-ok { background: var(--green-soft); color: var(--green-text); border-color: #bbf7d0; }
+    .alert-warn { background: var(--amber-soft); color: var(--amber-text); border-color: #fde68a; }
+
+    /* Infographic Summary Strip */
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 760px) {
+      .summary-strip { grid-template-columns: 1fr; }
+    }
+    .stat-tile {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 13px 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+    }
+    .ring-wrap {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+    }
+    .ring-wrap svg { transform: rotate(-90deg); }
+    .ring-num {
+      position: absolute;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .stat-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--subtle);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      color: var(--text-2);
+      flex-shrink: 0;
+    }
+    .stat-body { min-width: 0; flex: 1; }
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+    .stat-val {
       font-size: 13.5px;
       font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: background 0.15s, border-color 0.15s, opacity 0.15s;
-      text-decoration: none;
-    }
-    button:disabled { opacity: 0.55; cursor: not-allowed; }
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
-    .btn-success { background: var(--green); color: #fff; }
-    .btn-success:hover:not(:disabled) { background: #15803d; }
-    .btn-danger { background: var(--red); color: #fff; }
-    .btn-danger:hover:not(:disabled) { background: #b91c1c; }
-    .btn-ghost { background: #fff; color: var(--text); border-color: var(--border); }
-    .btn-ghost:hover:not(:disabled) { background: #f8fafc; border-color: #cbd5e1; }
-    .btn-sm { padding: 5px 10px; font-size: 12.5px; border-radius: 7px; }
-    .btn-xs { padding: 3px 8px; font-size: 12px; border-radius: 6px; }
-
-    label.field-label { display: block; font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 5px; }
-    input[type="text"], input[type="password"], select {
-      width: 100%;
-      font: inherit;
-      font-size: 13.5px;
-      padding: 8px 11px;
-      border: 1px solid #cbd5e1;
-      border-radius: 9px;
-      background: #fff;
       color: var(--text);
-      outline: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 1px;
     }
-    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12); }
 
-    /* Grid */
+    /* Tool Grid & Minimalist Cards */
     .grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px;
+      gap: 16px;
     }
-    @media (max-width: 980px) {
+    @media (max-width: 820px) {
       .grid { grid-template-columns: 1fr; }
     }
-
-    /* Tool Card */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      gap: 16px;
     }
-    .card-head {
-      padding: 16px 18px;
-      border-bottom: 1px solid var(--border);
+    .card-top {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       gap: 12px;
-      background: #fafcff;
     }
-    .card-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .card-head h2 { margin: 0; font-size: 17px; }
-    .card-desc { margin: 4px 0 0; font-size: 12.5px; color: var(--muted); }
-    .sched-line { margin-top: 6px; font-size: 12.5px; color: #334155; font-weight: 500; }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 9px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-    .pill-green { background: var(--green-bg); color: var(--green-text); }
-    .pill-red { background: var(--red-bg); color: var(--red-text); }
-    .pill-amber { background: var(--amber-bg); color: var(--amber-text); }
-    .pill-blue { background: var(--blue-bg); color: var(--blue-text); }
-    .pill-slate { background: var(--slate-bg); color: #475569; }
-
-    .run-box {
-      padding: 15px 18px;
-      border-bottom: 1px solid var(--border);
-      background: #fff;
-    }
-    .run-box-title {
-      font-size: 13px;
+    .card-title {
+      margin: 0;
+      font-size: 17px;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      color: #475569;
-      margin: 0 0 10px;
-    }
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    @media (max-width: 540px) { .form-row { grid-template-columns: 1fr; } }
-
-    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-    .chip {
-      border: 1px solid #cbd5e1;
-      background: #f8fafc;
-      color: #334155;
-      border-radius: 999px;
-      padding: 2px 9px;
-      font-size: 11.5px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .chip:hover { background: #e2e8f0; }
-
-    .check-row {
+      letter-spacing: -0.015em;
       display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      margin: 8px 0 12px;
-      color: #1e293b;
-      user-select: none;
-    }
-    .check-row input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
-
-    /* History Table */
-    .history-wrap { padding: 14px 18px 18px; }
-    .history-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .history-head h3 { margin: 0; font-size: 14px; color: #334155; }
-    .run-list { display: flex; flex-direction: column; gap: 9px; }
-    .run-item {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      background: #fcfdff;
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-    .run-top {
-      display: flex;
-      justify-content: space-between;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
     }
-    .run-meta {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      flex-wrap: wrap;
+    .card-sub {
+      margin: 3px 0 0;
       font-size: 12.5px;
       color: var(--muted);
     }
-    .run-actions {
+
+    /* Minimalist Toggle Switch */
+    .switch-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .switch-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .switch-text.on { color: var(--green-text); }
+    .switch-btn {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      padding: 0;
+      border-radius: 999px;
+      background: #cbd5e1;
+      border: none;
+      transition: background 0.18s ease;
+    }
+    .switch-btn.on { background: var(--green); }
+    .switch-btn::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+      transition: transform 0.18s ease;
+    }
+    .switch-btn.on::after { transform: translateX(18px); }
+
+    /* Infographic Metrics inside Card */
+    .metrics-box {
+      background: var(--subtle);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px 14px;
+      align-items: center;
+    }
+    .metric-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+    .metric-line {
       display: flex;
       align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
+      gap: 7px;
+      font-size: 12.5px;
+      color: var(--text-2);
+      min-width: 0;
     }
-    .step-hint {
-      font-size: 12px;
-      color: var(--blue-text);
-      background: #eff6ff;
-      border-radius: 6px;
-      padding: 4px 8px;
+    .metric-line span.val {
+      color: var(--text);
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
+    .spark-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
+    }
+    .spark-label {
+      font-size: 10.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+    .spark-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .sdot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      display: inline-block;
+    }
+    .sdot.ok { background: var(--green); }
+    .sdot.err { background: var(--red); }
+    .sdot.cancel { background: #94a3b8; }
+    .sdot.run {
+      background: var(--blue);
+      animation: pulse 1.1s infinite ease-in-out;
+    }
+    .sdot.latest { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #cbd5e1; }
+    .sdot.latest.ok { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #86efac; }
+    .sdot.latest.run { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #93c5fd; }
 
-    /* Alert / Toast */
-    .alert {
+    /* Live Banner */
+    .live-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 12px;
       border-radius: 10px;
-      padding: 11px 14px;
-      font-size: 13.5px;
-      margin-bottom: 14px;
-      border: 1px solid transparent;
+      background: var(--blue-soft);
+      border: 1px solid #bfdbfe;
+      color: var(--blue-text);
+      font-size: 12.5px;
+      font-weight: 500;
     }
-    .alert-err { background: var(--red-bg); color: var(--red-text); border-color: #fecaca; }
-    .alert-ok { background: var(--green-bg); color: var(--green-text); border-color: #bbf7d0; }
-    .alert-warn { background: var(--amber-bg); color: var(--amber-text); border-color: #fde68a; }
+    .live-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .live-banner-left span.txt {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-    /* Modal */
+    /* Card Actions: ONLY 2 clean buttons */
+    .card-actions {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 10px;
+      margin-top: auto;
+    }
+    .mode-chip {
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--amber-soft);
+      color: var(--amber-text);
+      border: 1px solid #fde68a;
+    }
+    .mode-chip-dark {
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      color: #fde68a;
+    }
+
+    /* Status Dot */
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+      background: #94a3b8;
+    }
+    .dot.ok { background: var(--green); }
+    .dot.err { background: var(--red); }
+    .dot.run { background: var(--blue); animation: pulse 1.1s infinite ease-in-out; }
+    .dot.wait { background: var(--amber); animation: pulse 1.1s infinite ease-in-out; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.35; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .spinning svg { animation: spin 0.9s linear infinite; }
+
+    /* Modals */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.55);
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(2px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -297,49 +487,133 @@
     }
     .modal {
       width: 100%;
-      max-width: 860px;
+      max-width: 820px;
       max-height: 86vh;
       background: var(--card);
-      border-radius: 14px;
-      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
+    .modal.modal-sm { max-width: 560px; }
     .modal-head {
-      padding: 13px 16px;
+      padding: 14px 18px;
       border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 10px;
+      flex-wrap: wrap;
     }
-    .modal-head h3 { margin: 0; font-size: 15.5px; }
+    .modal-head h3 { margin: 0; font-size: 15.5px; font-weight: 700; }
+    .modal-head-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .modal-body {
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .modal-foot {
+      padding: 12px 18px;
+      border-top: 1px solid var(--border);
+      background: var(--subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Settings Form inside Modal */
+    .setting-section {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      background: #fff;
+    }
+    .setting-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin: 0 0 11px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 540px) { .form-grid { grid-template-columns: 1fr; } }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+    .chip {
+      border: 1px solid var(--border);
+      background: var(--subtle);
+      color: var(--text-2);
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+    .chip:hover { background: #e2e8f0; color: var(--text); }
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      margin-top: 10px;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+    }
+    .check-row input { width: 15px; height: 15px; accent-color: var(--ink); cursor: pointer; }
+
+    /* Log Modal Run Tabs */
+    .run-tabs {
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--subtle);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      overflow-x: auto;
+    }
+    .run-tab {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text-2);
+      border-radius: 9px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .run-tab:hover { border-color: var(--border-strong); color: var(--text); }
+    .run-tab.active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: #fff;
+    }
     .log-pre {
       margin: 0;
-      padding: 14px 16px;
+      padding: 16px 18px;
       background: #0f172a;
       color: #e2e8f0;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size: 12px;
-      line-height: 1.5;
+      line-height: 1.55;
       overflow: auto;
       white-space: pre-wrap;
       word-break: break-word;
       flex: 1;
-      min-height: 280px;
-    }
-    .dot-spin {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: currentColor;
-      display: inline-block;
-      animation: pulse 1.1s infinite ease-in-out;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.35; transform: scale(0.85); }
-      50% { opacity: 1; transform: scale(1.15); }
+      min-height: 300px;
     }
   </style>
 </head>
@@ -347,16 +621,22 @@
   <!-- Login View -->
   <div id="loginView" class="login-shell">
     <div class="login-card">
-      <h1>Tool DSP — GSolution Auto</h1>
-      <p>Đăng nhập để bật/tắt lịch, bấm chạy tay và theo dõi báo cáo 2 luồng <strong>FILL IN DATA</strong> &amp; <strong>GIP 287</strong>.</p>
+      <div class="login-logo">
+        <span class="brand-mark" style="width:28px;height:28px;border-radius:8px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </span>
+        <span>Tool DSP</span>
+      </div>
+      <h1>Đăng nhập điều khiển</h1>
+      <p>Quản lý chạy tự động <strong>FILL IN DATA</strong> &amp; <strong>GIP 287</strong>.</p>
       <div id="envWarning" class="alert alert-warn hidden"></div>
       <div id="loginErr" class="alert alert-err hidden"></div>
       <form id="loginForm">
         <div style="margin-bottom: 14px;">
-          <label class="field-label" for="pwInput">Mật khẩu điều khiển</label>
+          <label class="field-label" for="pwInput">Mật khẩu</label>
           <input id="pwInput" type="password" placeholder="Nhập mật khẩu..." autocomplete="current-password" required />
         </div>
-        <button id="loginBtn" type="submit" class="btn-primary" style="width: 100%;">Đăng nhập</button>
+        <button id="loginBtn" type="submit" class="btn-ink" style="width: 100%;">Đăng nhập</button>
       </form>
     </div>
   </div>
@@ -365,45 +645,203 @@
   <div id="appView" class="wrap hidden">
     <header class="topbar">
       <div class="brand">
-        <h1>Bảng Điều Khiển Tool DSP</h1>
-        <div class="sub">Điều khiển trực tiếp 2 tool online • Không cần mở GitHub • Tự động lưu file Excel</div>
+        <div class="brand-mark">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div>
+          <h1>Tool DSP</h1>
+          <div class="brand-sub">GSolution Auto • Cloud Runner</div>
+        </div>
       </div>
       <div class="top-actions">
-        <span id="vnClock" class="clock-pill">Giờ VN: --:--</span>
-        <span id="refreshPill" class="clock-pill">Tự cập nhật: 45s</span>
-        <button id="refreshBtn" class="btn-ghost btn-sm" type="button">↻ Làm mới ngay</button>
-        <button id="logoutBtn" class="btn-ghost btn-sm" type="button">Đăng xuất</button>
+        <span id="vnClock" class="clock-pill">--:--:--</span>
+        <button id="settingsBtn" class="btn-outline btn-sm" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Tùy chọn</span>
+        </button>
+        <button id="refreshBtn" class="btn-outline btn-sm btn-icon" type="button" title="Làm mới ngay" aria-label="Làm mới ngay">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </button>
+        <button id="logoutBtn" class="btn-outline btn-sm" type="button">Đăng xuất</button>
       </div>
     </header>
 
     <div id="toastBox" class="alert hidden"></div>
 
-    <div id="cardsGrid" class="grid"></div>
+    <!-- Infographic Summary Strip -->
+    <section id="summaryStrip" class="summary-strip" aria-label="Tổng quan trạng thái">
+      <div class="stat-tile">
+        <div class="ring-wrap">
+          <svg width="38" height="38" viewBox="0 0 38 38">
+            <circle cx="19" cy="19" r="14" fill="none" stroke="#e5e7eb" stroke-width="4" />
+            <circle id="ringArc" cx="19" cy="19" r="14" fill="none" stroke="#16a34a" stroke-width="4" stroke-linecap="round" stroke-dasharray="87.96" stroke-dashoffset="87.96" />
+          </svg>
+          <span id="ringNum" class="ring-num">0/2</span>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Lịch tự động</div>
+          <div id="statSchedText" class="stat-val">Đang tải...</div>
+        </div>
+      </div>
+
+      <div class="stat-tile">
+        <div class="stat-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Hoạt động gần nhất</div>
+          <div id="statLastRun" class="stat-val">--</div>
+        </div>
+      </div>
+
+      <div class="stat-tile">
+        <div class="stat-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Chế độ chạy tay</div>
+          <div id="statModeText" class="stat-val">Chạy thật • Chỉ gắn tag</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 Minimalist Tool Cards -->
+    <main id="cardsGrid" class="grid"></main>
   </div>
 
-  <!-- Log Modal -->
+  <!-- Unified Settings Modal -->
+  <div id="settingsModal" class="modal-backdrop hidden">
+    <div class="modal modal-sm">
+      <div class="modal-head">
+        <h3>Tùy chọn chạy tay</h3>
+        <button id="closeSettingsBtn" class="btn-outline btn-xs" type="button">Đóng</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-section">
+          <div class="setting-section-title">
+            <span>FILL IN DATA</span>
+          </div>
+          <div class="form-grid">
+            <div>
+              <label class="field-label" for="fillin_mode">Chế độ chạy</label>
+              <select id="fillin_mode">
+                <option value="apply">Chạy thật (--apply)</option>
+                <option value="dry-run">Chỉ đọc kiểm tra (--dry-run)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label" for="fillin_sales">Ghi đè sale nhận đơn</label>
+              <input id="fillin_sales" type="text" placeholder="Trống = đọc Google Sheets" />
+            </div>
+          </div>
+          <div class="chip-row">
+            <button type="button" class="chip" onclick="setSales('Frescadorado')">Chỉ Fresca</button>
+            <button type="button" class="chip" onclick="setSales('angie0987654321.gip@gmail.com')">Chỉ Angelica</button>
+            <button type="button" class="chip" onclick="setSales('')">Theo Google Sheets</button>
+          </div>
+          <label class="check-row">
+            <input id="fillin_skip_step2" type="checkbox" />
+            <span>Bỏ qua Bước 2 (không quét 3 GIP hoàn &ge; 50%)</span>
+          </label>
+        </div>
+
+        <div class="setting-section">
+          <div class="setting-section-title">
+            <span>GIP 287 (WeUpBook)</span>
+          </div>
+          <div class="form-grid">
+            <div>
+              <label class="field-label" for="gip287_mode">Chế độ chạy</label>
+              <select id="gip287_mode">
+                <option value="apply">Chạy thật (--apply)</option>
+                <option value="dry-run">Chỉ đọc kiểm tra (--dry-run)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label" for="gip287_conc">Số tab song song</label>
+              <select id="gip287_conc">
+                <option value="4">4 tab (khuyên dùng)</option>
+                <option value="2">2 tab</option>
+                <option value="6">6 tab</option>
+              </select>
+            </div>
+          </div>
+          <label class="check-row">
+            <input id="gip287_nocancel" type="checkbox" />
+            <span><strong>Chỉ gắn tag, chưa hủy đơn</strong> (--no-cancel)</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <span id="refreshStatusNote" style="font-size:12px; color:var(--muted);">Tự cập nhật mỗi 45s (10s khi đang chạy)</span>
+        <div style="display:flex; gap:8px;">
+          <button id="resetSettingsBtn" class="btn-outline btn-xs" type="button">Đặt lại mặc định</button>
+          <button id="saveCloseSettingsBtn" class="btn-ink btn-xs" type="button">Xong</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log & History Modal -->
   <div id="logModal" class="modal-backdrop hidden">
     <div class="modal">
       <div class="modal-head">
         <h3 id="logModalTitle">Chi tiết Log</h3>
-        <div style="display:flex; gap:8px;">
-          <button id="reloadLogBtn" class="btn-ghost btn-sm" type="button">↻ Tải lại log</button>
-          <button id="closeLogBtn" class="btn-ghost btn-sm" type="button">Đóng ✕</button>
+        <div class="modal-head-actions">
+          <a id="modalArtifactBtn" class="btn btn-outline btn-xs hidden" href="#" target="_blank" rel="noopener">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Tải Excel/Log</span>
+          </a>
+          <button id="modalCancelBtn" class="btn-danger-soft btn-xs hidden" type="button">Dừng</button>
+          <button id="reloadLogBtn" class="btn-outline btn-xs" type="button">Tải lại</button>
+          <button id="closeLogBtn" class="btn-outline btn-xs" type="button">Đóng</button>
         </div>
       </div>
+      <div id="logRunTabs" class="run-tabs hidden"></div>
       <pre id="logPre" class="log-pre">Đang tải log...</pre>
     </div>
   </div>
 
   <script>
+    const SETTINGS_KEY = "tool_dsp_settings_v1";
+    const DEFAULT_SETTINGS = {
+      fillin: { mode: "apply", sales: "", skip_step2: false, concurrency: 4 },
+      gip287: { mode: "apply", no_cancel: true, concurrency: 4 },
+    };
+
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem(SETTINGS_KEY);
+        if (!raw) return structuredCloneCompat(DEFAULT_SETTINGS);
+        const parsed = JSON.parse(raw);
+        return {
+          fillin: { ...DEFAULT_SETTINGS.fillin, ...(parsed.fillin || {}) },
+          gip287: { ...DEFAULT_SETTINGS.gip287, ...(parsed.gip287 || {}) },
+        };
+      } catch {
+        return structuredCloneCompat(DEFAULT_SETTINGS);
+      }
+    }
+
+    function structuredCloneCompat(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
     const state = {
       data: null,
       loading: false,
       refreshTimer: null,
+      activeLogToolId: null,
       activeLogRunId: null,
-      activeLogTitle: "",
       busyAction: {},
+      settings: loadSettings(),
     };
+
+    function saveSettings() {
+      try {
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+      } catch {}
+    }
 
     function escapeHtml(str) {
       return String(str || "")
@@ -456,35 +894,43 @@
       const el = document.getElementById("vnClock");
       const now = new Date();
       el.textContent =
-        "Giờ VN: " +
+        "VN " +
         now.toLocaleString("vi-VN", {
           timeZone: "Asia/Ho_Chi_Minh",
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
-          day: "2-digit",
-          month: "2-digit",
           hour12: false,
         });
     }
 
-    function statusBadge(run) {
-      if (run.status === "queued" || run.status === "waiting" || run.status === "pending") {
-        return `<span class="pill pill-amber"><span class="dot-spin"></span>Đang chờ khởi tạo</span>`;
-      }
-      if (run.status === "in_progress") {
-        return `<span class="pill pill-blue"><span class="dot-spin"></span>Đang chạy</span>`;
-      }
-      if (run.conclusion === "success") {
-        return `<span class="pill pill-green">✓ Thành công</span>`;
-      }
-      if (run.conclusion === "cancelled") {
-        return `<span class="pill pill-slate">Đã dừng</span>`;
-      }
-      if (run.conclusion === "failure" || run.conclusion === "timed_out") {
-        return `<span class="pill pill-red">✕ Lỗi (${escapeHtml(run.conclusion)})</span>`;
-      }
-      return `<span class="pill pill-slate">${escapeHtml(run.conclusion || run.status)}</span>`;
+    function isRunActive(r) {
+      return r && (r.status === "in_progress" || r.status === "queued" || r.status === "waiting" || r.status === "pending");
+    }
+
+    function runDotClass(r) {
+      if (!r) return "";
+      if (r.status === "queued" || r.status === "waiting" || r.status === "pending") return "wait";
+      if (r.status === "in_progress") return "run";
+      if (r.conclusion === "success") return "ok";
+      if (r.conclusion === "failure" || r.conclusion === "timed_out") return "err";
+      return "";
+    }
+
+    function runStatusLabel(r) {
+      if (!r) return "Chưa chạy";
+      if (r.status === "queued" || r.status === "waiting" || r.status === "pending") return "Đang chờ";
+      if (r.status === "in_progress") return "Đang chạy";
+      if (r.conclusion === "success") return "Thành công";
+      if (r.conclusion === "cancelled") return "Đã dừng";
+      if (r.conclusion === "failure" || r.conclusion === "timed_out") return "Lỗi";
+      return r.conclusion || r.status || "--";
+    }
+
+    function compactSchedule(tool) {
+      if (tool.id === "fillin") return "06:00 – 14:05 hằng ngày";
+      if (tool.id === "gip287") return "08:45, 11:45, 14:45, 15:05";
+      return tool.scheduleText || "--";
     }
 
     async function api(url, opts = {}) {
@@ -521,198 +967,192 @@
       document.getElementById("appView").classList.remove("hidden");
     }
 
+    function renderSummaryStrip() {
+      if (!state.data || !state.data.tools) return;
+      const fillin = state.data.tools.fillin;
+      const gip287 = state.data.tools.gip287;
+      const enabledCount = (fillin.enabled ? 1 : 0) + (gip287.enabled ? 1 : 0);
+
+      // Ring arc (r=14 => C=87.96)
+      const circ = 87.96;
+      const arc = document.getElementById("ringArc");
+      arc.setAttribute("stroke-dashoffset", String((circ * (2 - enabledCount)) / 2));
+      arc.setAttribute("stroke", enabledCount === 2 ? "#16a34a" : enabledCount === 1 ? "#d97706" : "#94a3b8");
+      document.getElementById("ringNum").textContent = `${enabledCount}/2`;
+      document.getElementById("statSchedText").textContent =
+        enabledCount === 2
+          ? "2/2 tool đang bật"
+          : enabledCount === 1
+          ? `${fillin.enabled ? "Chỉ FILL IN" : "Chỉ GIP 287"} đang bật`
+          : "Tạm tắt cả 2 tool";
+
+      // Latest run across both tools
+      const taggedRuns = [
+        ...(fillin.runs || []).map((r) => ({ ...r, toolName: "FILL IN DATA" })),
+        ...(gip287.runs || []).map((r) => ({ ...r, toolName: "GIP 287" })),
+      ].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+      const latest = taggedRuns[0];
+      const lastEl = document.getElementById("statLastRun");
+      if (latest) {
+        lastEl.innerHTML = `<span class="dot ${runDotClass(latest)}" style="margin-right:6px;"></span>${escapeHtml(latest.toolName)} #${latest.runNumber} · ${escapeHtml(runStatusLabel(latest))} (${escapeHtml(formatVnTime(latest.startedAt || latest.createdAt))})`;
+      } else {
+        lastEl.textContent = "Chưa có lượt chạy";
+      }
+
+      // Current manual mode summary
+      const fSet = state.settings.fillin;
+      const gSet = state.settings.gip287;
+      const modeParts = [];
+      if (fSet.mode === "dry-run" || gSet.mode === "dry-run") {
+        modeParts.push(fSet.mode === "dry-run" && gSet.mode === "dry-run" ? "Dry-run cả 2" : "Có Dry-run");
+      } else {
+        modeParts.push("Chạy thật");
+      }
+      if (gSet.no_cancel) {
+        modeParts.push("GIP 287 chỉ gắn tag");
+      } else {
+        modeParts.push("GIP 287 tự hủy");
+      }
+      if (fSet.sales) {
+        modeParts.push(`Sale: ${fSet.sales === "Frescadorado" ? "Fresca" : "Angelica"}`);
+      }
+      document.getElementById("statModeText").textContent = modeParts.join(" · ");
+    }
+
+    function renderSparkline(runs) {
+      const recent = (runs || []).slice(0, 5).reverse();
+      const slots = [];
+      for (let i = 0; i < 5 - recent.length; i++) {
+        slots.push(`<span class="sdot" title="Trống"></span>`);
+      }
+      recent.forEach((r, idx) => {
+        const isLatest = idx === recent.length - 1;
+        let cls = "";
+        if (isRunActive(r)) cls = "run";
+        else if (r.conclusion === "success") cls = "ok";
+        else if (r.conclusion === "failure" || r.conclusion === "timed_out") cls = "err";
+        else if (r.conclusion === "cancelled") cls = "cancel";
+        const tip = `#${r.runNumber} • ${runStatusLabel(r)} (${formatVnTime(r.startedAt || r.createdAt)})`;
+        slots.push(`<span class="sdot ${cls}${isLatest ? " latest" : ""}" title="${escapeHtml(tip)}"></span>`);
+      });
+      return slots.join("");
+    }
+
     function renderToolCard(tool) {
+      const runs = tool.runs || [];
+      const latest = runs[0] || null;
+      const activeRun = runs.find(isRunActive) || null;
       const toggleBusy = Boolean(state.busyAction[`toggle_${tool.id}`]);
       const runBusy = Boolean(state.busyAction[`run_${tool.id}`]);
-      const statusPill = tool.enabled
-        ? `<span class="pill pill-green">● ĐANG BẬT LỊCH</span>`
-        : `<span class="pill pill-red">■ ĐANG TẮT LỊCH</span>`;
-
-      const toggleBtn = tool.enabled
-        ? `<button class="btn-danger btn-sm" onclick="handleToggle('${tool.id}', false)" ${toggleBusy ? "disabled" : ""}>Tắt lịch tự động</button>`
-        : `<button class="btn-success btn-sm" onclick="handleToggle('${tool.id}', true)" ${toggleBusy ? "disabled" : ""}>Bật lịch tự động</button>`;
-
-      const controlsHtml =
+      const toolCfg = state.settings[tool.id];
+      const isDryRun = toolCfg && toolCfg.mode === "dry-run";
+      const displayName = tool.id === "gip287" ? "GIP 287" : "FILL IN DATA";
+      const displaySub =
         tool.id === "fillin"
-          ? `
-            <div class="form-row">
-              <div>
-                <label class="field-label" for="fillin_mode">Chế độ chạy</label>
-                <select id="fillin_mode">
-                  <option value="apply" selected>Chạy thật (--apply)</option>
-                  <option value="dry-run">Chỉ đọc kiểm tra (--dry-run)</option>
-                </select>
-              </div>
-              <div>
-                <label class="field-label" for="fillin_sales">Ghi đè sale nhận đơn (tùy chọn)</label>
-                <input id="fillin_sales" type="text" placeholder="Để trống = tự đọc Google Sheets" />
-                <div class="chip-row">
-                  <button type="button" class="chip" onclick="setSales('Frescadorado')">Chỉ Fresca</button>
-                  <button type="button" class="chip" onclick="setSales('angie0987654321.gip@gmail.com')">Chỉ Angelica</button>
-                  <button type="button" class="chip" onclick="setSales('')">Theo Google Sheets</button>
-                </div>
-              </div>
-            </div>
-            <label class="check-row">
-              <input id="fillin_skip_step2" type="checkbox" />
-              <span>Bỏ qua Bước 2 (không quét 3 GIP hoàn ≥ 50%)</span>
-            </label>
-            <button class="btn-primary" style="width:100%" onclick="handleRun('fillin')" ${runBusy ? "disabled" : ""}>
-              ${runBusy ? "Đang gửi lệnh..." : "▶ Chạy FILL IN DATA ngay"}
-            </button>
-          `
-          : `
-            <div class="form-row">
-              <div>
-                <label class="field-label" for="gip287_mode">Chế độ chạy</label>
-                <select id="gip287_mode">
-                  <option value="apply" selected>Chạy thật (--apply)</option>
-                  <option value="dry-run">Chỉ đọc kiểm tra (--dry-run)</option>
-                </select>
-              </div>
-              <div>
-                <label class="field-label" for="gip287_conc">Số tab kiểm tra song song</label>
-                <select id="gip287_conc">
-                  <option value="4" selected>4 tab (khuyên dùng)</option>
-                  <option value="2">2 tab</option>
-                  <option value="6">6 tab</option>
-                </select>
-              </div>
-            </div>
-            <label class="check-row">
-              <input id="gip287_nocancel" type="checkbox" checked />
-              <span><strong>Chỉ gắn tag, chưa hủy đơn</strong> (--no-cancel — tắt để tự hủy TEST / DUPLICATE)</span>
-            </label>
-            <button class="btn-primary" style="width:100%" onclick="handleRun('gip287')" ${runBusy ? "disabled" : ""}>
-              ${runBusy ? "Đang gửi lệnh..." : "▶ Chạy GIP 287 ngay"}
-            </button>
-          `;
+          ? "Chuyển CALL · Check trùng · Chia sale"
+          : "WeUpBook · Trả hàng · Check trùng";
 
-      const runsHtml =
-        tool.runs && tool.runs.length
-          ? tool.runs
-              .map((r) => {
-                const isRunning = r.status === "in_progress" || r.status === "queued" || r.status === "waiting";
-                const trig = r.event === "schedule" ? "Lịch tự động" : "Bấm tay";
-                const cancelBusy = Boolean(state.busyAction[`cancel_${r.id}`]);
-                const artButtons = (r.artifacts || [])
-                  .map(
-                    (a) =>
-                      `<a class="btn btn-ghost btn-xs" href="/api/artifact?id=${encodeURIComponent(a.id)}&name=${encodeURIComponent(a.name)}" target="_blank" rel="noopener">⬇ Tải Excel/Log</a>`
-                  )
-                  .join("");
-                const stepBanner = r.currentStep
-                  ? `<div class="step-hint">Đang ở bước: <strong>${escapeHtml(r.currentStep)}</strong></div>`
-                  : "";
-                return `
-                  <div class="run-item">
-                    <div class="run-top">
-                      <div class="run-meta">
-                        <strong style="color:var(--text);">#${r.runNumber}</strong>
-                        <span>${escapeHtml(formatVnTime(r.startedAt || r.createdAt))}</span>
-                        <span class="pill pill-slate">${trig}</span>
-                        <span>${formatDuration(r.durationSec)}</span>
-                      </div>
-                      <div>${statusBadge(r)}</div>
-                    </div>
-                    ${stepBanner}
-                    <div class="run-actions">
-                      <button class="btn-ghost btn-xs" type="button" onclick="openLog(${r.id}, '${escapeHtml(tool.name)} #${r.runNumber}')">Xem Log</button>
-                      ${artButtons}
-                      ${
-                        isRunning
-                          ? `<button class="btn-danger btn-xs" type="button" onclick="handleCancel(${r.id})" ${cancelBusy ? "disabled" : ""}>■ Dừng phiên</button>`
-                          : ""
-                      }
-                    </div>
-                  </div>
-                `;
-              })
-              .join("")
-          : `<div style="color:var(--muted); font-size:13px;">Chưa có lịch sử chạy nào trên GitHub Actions.</div>`;
+      const latestSummary = latest
+        ? `<span class="dot ${runDotClass(latest)}"></span><span class="val">#${latest.runNumber} · ${escapeHtml(runStatusLabel(latest))} · ${escapeHtml(formatVnTime(latest.startedAt || latest.createdAt))}${latest.durationSec != null ? ` (${formatDuration(latest.durationSec)})` : ""}</span>`
+        : `<span class="dot"></span><span class="val" style="color:var(--muted); font-weight:500;">Chưa có lịch sử chạy</span>`;
+
+      const liveBanner = activeRun
+        ? `
+          <div class="live-banner">
+            <div class="live-banner-left">
+              <span class="dot ${runDotClass(activeRun)}"></span>
+              <span class="txt">#${activeRun.runNumber}: ${escapeHtml(activeRun.currentStep || "Đang xử lý...")}</span>
+            </div>
+            <button class="btn-danger-soft btn-xs" type="button" onclick="handleCancel(${activeRun.id})" ${state.busyAction[`cancel_${activeRun.id}`] ? "disabled" : ""}>Dừng</button>
+          </div>
+        `
+        : "";
 
       return `
         <section class="card">
-          <div class="card-head">
+          <div class="card-top">
             <div>
-              <div class="card-title-row">
-                <h2>${escapeHtml(tool.name)}</h2>
-                ${statusPill}
+              <h2 class="card-title">
+                <span>${displayName}</span>
+                ${isDryRun ? `<span class="mode-chip">Dry-run</span>` : ""}
+              </h2>
+              <p class="card-sub">${displaySub}</p>
+            </div>
+            <div class="switch-wrap">
+              <span class="switch-text ${tool.enabled ? "on" : ""}">${tool.enabled ? "Lịch bật" : "Lịch tắt"}</span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked="${tool.enabled ? "true" : "false"}"
+                aria-label="${tool.enabled ? "Tắt lịch tự động" : "Bật lịch tự động"} ${displayName}"
+                class="switch-btn ${tool.enabled ? "on" : ""}"
+                onclick="handleToggle('${tool.id}', ${!tool.enabled})"
+                ${toggleBusy ? "disabled" : ""}
+              ></button>
+            </div>
+          </div>
+
+          <div class="metrics-box">
+            <div class="metric-row">
+              <div class="metric-line">
+                <span style="color:var(--muted); flex-shrink:0;">Lịch:</span>
+                <span class="val">${escapeHtml(compactSchedule(tool))}</span>
               </div>
-              <div class="card-desc">${escapeHtml(tool.subtitle)}</div>
-              <div class="sched-line">⏰ Lịch tự động: ${escapeHtml(tool.scheduleText)}</div>
+              <div class="metric-line">
+                <span style="color:var(--muted); flex-shrink:0;">Gần nhất:</span>
+                ${latestSummary}
+              </div>
             </div>
-            <div>${toggleBtn}</div>
+            <div class="spark-col">
+              <span class="spark-label">5 lượt gần</span>
+              <div class="spark-dots">${renderSparkline(runs)}</div>
+            </div>
           </div>
 
-          <div class="run-box">
-            <div class="run-box-title">Chạy thủ công ngay</div>
-            ${controlsHtml}
-          </div>
+          ${liveBanner}
 
-          <div class="history-wrap">
-            <div class="history-head">
-              <h3>Tracking &amp; Lịch sử gần nhất</h3>
-              <span style="font-size:12px; color:var(--muted);">${(tool.runs || []).length} lượt</span>
-            </div>
-            <div class="run-list">${runsHtml}</div>
+          <div class="card-actions">
+            <button class="btn-ink" type="button" onclick="handleRun('${tool.id}')" ${runBusy ? "disabled" : ""}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+              <span>${runBusy ? "Đang gửi..." : "Chạy ngay"}</span>
+              ${isDryRun ? `<span class="mode-chip-dark">Thử</span>` : ""}
+            </button>
+            <button class="btn-outline" type="button" onclick="openToolLogs('${tool.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span>Xem log</span>
+            </button>
           </div>
         </section>
       `;
     }
 
-    function preserveDraftValues() {
-      const fillSales = document.getElementById("fillin_sales")?.value;
-      const fillMode = document.getElementById("fillin_mode")?.value;
-      const fillSkip = document.getElementById("fillin_skip_step2")?.checked;
-      const gipMode = document.getElementById("gip287_mode")?.value;
-      const gipConc = document.getElementById("gip287_conc")?.value;
-      const gipNoCancel = document.getElementById("gip287_nocancel")?.checked;
-      return { fillSales, fillMode, fillSkip, gipMode, gipConc, gipNoCancel };
-    }
-
-    function restoreDraftValues(draft) {
-      if (draft.fillSales !== undefined && document.getElementById("fillin_sales")) {
-        document.getElementById("fillin_sales").value = draft.fillSales;
-      }
-      if (draft.fillMode !== undefined && document.getElementById("fillin_mode")) {
-        document.getElementById("fillin_mode").value = draft.fillMode;
-      }
-      if (draft.fillSkip !== undefined && document.getElementById("fillin_skip_step2")) {
-        document.getElementById("fillin_skip_step2").checked = draft.fillSkip;
-      }
-      if (draft.gipMode !== undefined && document.getElementById("gip287_mode")) {
-        document.getElementById("gip287_mode").value = draft.gipMode;
-      }
-      if (draft.gipConc !== undefined && document.getElementById("gip287_conc")) {
-        document.getElementById("gip287_conc").value = draft.gipConc;
-      }
-      if (draft.gipNoCancel !== undefined && document.getElementById("gip287_nocancel")) {
-        document.getElementById("gip287_nocancel").checked = draft.gipNoCancel;
-      }
-    }
-
     function renderDashboard() {
       if (!state.data || !state.data.tools) return;
-      const draft = preserveDraftValues();
+      renderSummaryStrip();
       const grid = document.getElementById("cardsGrid");
       grid.innerHTML =
         renderToolCard(state.data.tools.fillin) +
         renderToolCard(state.data.tools.gip287);
-      restoreDraftValues(draft);
 
       const allRuns = [
         ...(state.data.tools.fillin.runs || []),
         ...(state.data.tools.gip287.runs || []),
       ];
-      const hasActive = allRuns.some((r) => r.status === "in_progress" || r.status === "queued");
+      const hasActive = allRuns.some(isRunActive);
       const intervalSec = hasActive ? 10 : 45;
-      document.getElementById("refreshPill").textContent = hasActive
-        ? "Đang chạy • cập nhật mỗi 10s"
-        : "Tự cập nhật mỗi 45s";
+      document.getElementById("refreshStatusNote").textContent = hasActive
+        ? "Đang chạy • tự cập nhật mỗi 10s"
+        : "Tự cập nhật mỗi 45s (10s khi đang chạy)";
 
       clearTimeout(state.refreshTimer);
       state.refreshTimer = setTimeout(loadStatus, intervalSec * 1000);
+
+      // Refresh log modal header/tabs if open
+      if (!document.getElementById("logModal").classList.contains("hidden") && state.activeLogToolId) {
+        renderLogRunTabs(state.activeLogToolId);
+        updateModalRunControls();
+      }
     }
 
     async function loadStatus() {
@@ -720,6 +1160,7 @@
       state.loading = true;
       const btn = document.getElementById("refreshBtn");
       btn.disabled = true;
+      btn.classList.add("spinning");
       try {
         const res = await api("/api/status");
         state.data = res;
@@ -731,12 +1172,34 @@
       } finally {
         state.loading = false;
         btn.disabled = false;
+        btn.classList.remove("spinning");
       }
     }
 
+    // Settings modal sync
+    function syncSettingsInputs() {
+      document.getElementById("fillin_mode").value = state.settings.fillin.mode;
+      document.getElementById("fillin_sales").value = state.settings.fillin.sales;
+      document.getElementById("fillin_skip_step2").checked = Boolean(state.settings.fillin.skip_step2);
+      document.getElementById("gip287_mode").value = state.settings.gip287.mode;
+      document.getElementById("gip287_conc").value = String(state.settings.gip287.concurrency || 4);
+      document.getElementById("gip287_nocancel").checked = Boolean(state.settings.gip287.no_cancel);
+    }
+
+    function readSettingsInputs() {
+      state.settings.fillin.mode = document.getElementById("fillin_mode").value;
+      state.settings.fillin.sales = document.getElementById("fillin_sales").value.trim();
+      state.settings.fillin.skip_step2 = document.getElementById("fillin_skip_step2").checked;
+      state.settings.gip287.mode = document.getElementById("gip287_mode").value;
+      state.settings.gip287.concurrency = Number(document.getElementById("gip287_conc").value || 4);
+      state.settings.gip287.no_cancel = document.getElementById("gip287_nocancel").checked;
+      saveSettings();
+      if (state.data) renderDashboard();
+    }
+
     window.setSales = function (val) {
-      const el = document.getElementById("fillin_sales");
-      if (el) el.value = val;
+      document.getElementById("fillin_sales").value = val;
+      readSettingsInputs();
     };
 
     window.handleToggle = async function (toolId, nextEnabled) {
@@ -763,28 +1226,26 @@
     };
 
     window.handleRun = async function (toolId) {
-      let payload;
-      if (toolId === "fillin") {
-        payload = {
-          tool: "fillin",
-          mode: document.getElementById("fillin_mode").value,
-          sales: document.getElementById("fillin_sales").value.trim(),
-          skip_step2: document.getElementById("fillin_skip_step2").checked,
-          concurrency: 4,
-        };
-      } else {
-        payload = {
-          tool: "gip287",
-          mode: document.getElementById("gip287_mode").value,
-          no_cancel: document.getElementById("gip287_nocancel").checked,
-          concurrency: Number(document.getElementById("gip287_conc").value || 4),
-        };
-      }
+      const cfg = state.settings[toolId];
+      const label = toolId === "fillin" ? "FILL IN DATA" : "GIP 287";
+      const payload =
+        toolId === "fillin"
+          ? {
+              tool: "fillin",
+              mode: cfg.mode,
+              sales: cfg.sales,
+              skip_step2: Boolean(cfg.skip_step2),
+              concurrency: 4,
+            }
+          : {
+              tool: "gip287",
+              mode: cfg.mode,
+              no_cancel: Boolean(cfg.no_cancel),
+              concurrency: Number(cfg.concurrency || 4),
+            };
 
       if (payload.mode === "apply") {
-        const ok = window.confirm(
-          `Xác nhận chạy THẬT (--apply) cho ${toolId === "fillin" ? "FILL IN DATA" : "GIP 287"}?`
-        );
+        const ok = window.confirm(`Xác nhận chạy THẬT (--apply) cho ${label}?`);
         if (!ok) return;
       }
 
@@ -824,26 +1285,142 @@
       }
     };
 
-    window.openLog = async function (runId, title) {
+    function getSelectedRun() {
+      if (!state.data || !state.activeLogToolId) return null;
+      const tool = state.data.tools[state.activeLogToolId];
+      if (!tool || !tool.runs) return null;
+      return tool.runs.find((r) => r.id === state.activeLogRunId) || tool.runs[0] || null;
+    }
+
+    function updateModalRunControls() {
+      const run = getSelectedRun();
+      const artBtn = document.getElementById("modalArtifactBtn");
+      const cancelBtn = document.getElementById("modalCancelBtn");
+
+      if (run && run.artifacts && run.artifacts.length) {
+        const a = run.artifacts[0];
+        artBtn.href = `/api/artifact?id=${encodeURIComponent(a.id)}&name=${encodeURIComponent(a.name)}`;
+        artBtn.classList.remove("hidden");
+      } else {
+        artBtn.classList.add("hidden");
+      }
+
+      if (run && isRunActive(run)) {
+        cancelBtn.classList.remove("hidden");
+        cancelBtn.disabled = Boolean(state.busyAction[`cancel_${run.id}`]);
+        cancelBtn.onclick = () => handleCancel(run.id);
+      } else {
+        cancelBtn.classList.add("hidden");
+      }
+    }
+
+    function renderLogRunTabs(toolId) {
+      const tool = state.data?.tools?.[toolId];
+      const runs = (tool?.runs || []).slice(0, 5);
+      const wrap = document.getElementById("logRunTabs");
+      if (!runs.length) {
+        wrap.classList.add("hidden");
+        wrap.innerHTML = "";
+        return;
+      }
+      wrap.classList.remove("hidden");
+      wrap.innerHTML = runs
+        .map((r) => {
+          const active = r.id === state.activeLogRunId ? "active" : "";
+          const trig = r.event === "schedule" ? "Tự động" : "Tay";
+          return `
+            <button type="button" class="run-tab ${active}" onclick="selectLogRun('${toolId}', ${r.id})">
+              <span class="dot ${runDotClass(r)}"></span>
+              <span>#${r.runNumber} · ${escapeHtml(formatVnTime(r.startedAt || r.createdAt))} · ${trig}</span>
+            </button>
+          `;
+        })
+        .join("");
+    }
+
+    window.selectLogRun = async function (toolId, runId) {
+      state.activeLogToolId = toolId;
       state.activeLogRunId = runId;
-      state.activeLogTitle = title;
-      document.getElementById("logModalTitle").textContent = `Log — ${title}`;
-      document.getElementById("logPre").textContent = "Đang tải log từ server...";
-      document.getElementById("logModal").classList.remove("hidden");
+      const tool = state.data?.tools?.[toolId];
+      const run = (tool?.runs || []).find((r) => r.id === runId);
+      const label = toolId === "fillin" ? "FILL IN DATA" : "GIP 287";
+      document.getElementById("logModalTitle").textContent = run
+        ? `Log — ${label} #${run.runNumber} (${runStatusLabel(run)})`
+        : `Log — ${label}`;
+      renderLogRunTabs(toolId);
+      updateModalRunControls();
+
+      const pre = document.getElementById("logPre");
+      pre.textContent = "Đang tải log từ server...";
       try {
         const res = await api(`/api/logs?runId=${encodeURIComponent(runId)}`);
-        document.getElementById("logPre").textContent =
-          (res.lines && res.lines.length ? res.lines.join("\n") : "(Trống)");
+        pre.textContent = res.lines && res.lines.length ? res.lines.join("\n") : "(Trống)";
       } catch (err) {
-        document.getElementById("logPre").textContent = `Lỗi tải log: ${err.message}`;
+        pre.textContent = `Lỗi tải log: ${err.message}`;
       }
     };
+
+    window.openToolLogs = async function (toolId) {
+      const tool = state.data?.tools?.[toolId];
+      const runs = tool?.runs || [];
+      const label = toolId === "fillin" ? "FILL IN DATA" : "GIP 287";
+      state.activeLogToolId = toolId;
+      document.getElementById("logModal").classList.remove("hidden");
+
+      if (!runs.length) {
+        state.activeLogRunId = null;
+        document.getElementById("logModalTitle").textContent = `Log — ${label}`;
+        document.getElementById("logRunTabs").classList.add("hidden");
+        document.getElementById("modalArtifactBtn").classList.add("hidden");
+        document.getElementById("modalCancelBtn").classList.add("hidden");
+        document.getElementById("logPre").textContent = "Chưa có lượt chạy nào trên GitHub Actions.";
+        return;
+      }
+
+      await selectLogRun(toolId, runs[0].id);
+    };
+
+    // Modal handlers
+    document.getElementById("settingsBtn").onclick = () => {
+      syncSettingsInputs();
+      document.getElementById("settingsModal").classList.remove("hidden");
+    };
+    document.getElementById("closeSettingsBtn").onclick = () => {
+      document.getElementById("settingsModal").classList.add("hidden");
+    };
+    document.getElementById("saveCloseSettingsBtn").onclick = () => {
+      readSettingsInputs();
+      document.getElementById("settingsModal").classList.add("hidden");
+    };
+    document.getElementById("resetSettingsBtn").onclick = () => {
+      state.settings = structuredCloneCompat(DEFAULT_SETTINGS);
+      saveSettings();
+      syncSettingsInputs();
+      if (state.data) renderDashboard();
+      showToast("Đã đặt lại tùy chọn mặc định.", "ok");
+    };
+    document.getElementById("settingsModal").onclick = (e) => {
+      if (e.target === e.currentTarget) document.getElementById("settingsModal").classList.add("hidden");
+    };
+    ["fillin_mode", "fillin_sales", "fillin_skip_step2", "gip287_mode", "gip287_conc", "gip287_nocancel"].forEach(
+      (id) => {
+        const el = document.getElementById(id);
+        el.addEventListener("change", readSettingsInputs);
+        if (el.tagName === "INPUT" && el.type === "text") {
+          el.addEventListener("input", readSettingsInputs);
+        }
+      }
+    );
 
     document.getElementById("closeLogBtn").onclick = () => {
       document.getElementById("logModal").classList.add("hidden");
     };
     document.getElementById("reloadLogBtn").onclick = () => {
-      if (state.activeLogRunId) window.openLog(state.activeLogRunId, state.activeLogTitle);
+      if (state.activeLogToolId && state.activeLogRunId) {
+        selectLogRun(state.activeLogToolId, state.activeLogRunId);
+      } else if (state.activeLogToolId) {
+        openToolLogs(state.activeLogToolId);
+      }
     };
     document.getElementById("logModal").onclick = (e) => {
       if (e.target === e.currentTarget) document.getElementById("logModal").classList.add("hidden");
