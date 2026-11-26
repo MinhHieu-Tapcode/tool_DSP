@@ -1,0 +1,8 @@
+.env
+storage_state.json
+*.lock
+*.tmp
+reports/
+logs/
+__pycache__/
+*.pyc

@@ -1,0 +1,115 @@
+name: Fill-In Data Auto
+
+on:
+  schedule:
+    # UTC -> UTC+7 (VN): 06:00, 06:30, 07:00..13:30 every 30m, plus 14:00 & 14:05 cut-off sweep
+    - cron: "0,30 23 * * *"
+    - cron: "0,30 0-6 * * *"
+    - cron: "0,5 7 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Chế độ chạy (chọn dry-run để test chỉ đọc, apply để chạy thật)"
+        type: choice
+        options:
+          - dry-run
+          - apply
+        default: dry-run
+      sales:
+        description: "Ghi đè sale nhận đơn (để trống = tự đọc Google Sheets)"
+        type: string
+        default: ""
+      date:
+        description: "Ngày kiểm tra lịch trực DD/MM/YYYY (để trống = hôm nay giờ VN)"
+        type: string
+        default: ""
+      skip_step2:
+        description: "Bỏ qua Bước 2 (3 GIP >= 50%)"
+        type: boolean
+        default: false
+      concurrency:
+        description: "Số tab tra SĐT song song"
+        type: string
+        default: "4"
+
+concurrency:
+  group: gsolution-fillin
+  cancel-in-progress: false
+
+jobs:
+  run-fillin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('requirements.txt') }}
+
+      - name: Install Chromium for Playwright
+        run: python -m playwright install chromium --with-deps
+
+      - name: Run unit tests
+        run: python -m unittest discover -s . -v
+
+      - name: Run Fill-In pipeline
+        env:
+          GSOLUTION_EMAIL: ${{ secrets.GSOLUTION_EMAIL }}
+          GSOLUTION_PASSWORD: ${{ secrets.GSOLUTION_PASSWORD }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GSOLUTION_EMAIL:-}" ] || [ -z "${GSOLUTION_PASSWORD:-}" ]; then
+            echo "::error::Thiếu Secrets GSOLUTION_EMAIL hoặc GSOLUTION_PASSWORD trong Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
+          args=(--mode fillin --concurrency "${{ inputs.concurrency || '4' }}")
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.mode }}" = "apply" ]; then
+            args+=(--apply)
+          else
+            args+=(--dry-run)
+          fi
+
+          if [ -n "${{ inputs.sales }}" ]; then
+            args+=(--sales "${{ inputs.sales }}")
+          fi
+          if [ -n "${{ inputs.date }}" ]; then
+            args+=(--date "${{ inputs.date }}")
+          fi
+          if [ "${{ inputs.skip_step2 }}" = "true" ]; then
+            args+=(--skip-step2)
+          fi
+          if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
+            args+=(--notify-telegram)
+          fi
+
+          python run.py "${args[@]}"
+
+      - name: Upload Excel, JSON & Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fillin-report-${{ github.run_number }}-${{ github.run_attempt }}
+          path: |
+            reports/
+            logs/
+          retention-days: 14
+          if-no-files-found: warn
