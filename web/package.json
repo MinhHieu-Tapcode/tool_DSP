@@ -1,0 +1,9 @@
+{
+  "name": "tool-dsp-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Web Control Dashboard for GSolution Auto (Fill-In & GIP 287)",
+  "engines": {
+    "node": "20.x"
+  }
+}

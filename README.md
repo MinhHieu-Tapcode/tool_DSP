@@ -111,7 +111,22 @@ Repo đã tích hợp sẵn 2 workflow trong `.github/workflows/`:
 
 ---
 
-## 6. Chạy Unit Test kiểm tra Rule
+## 6. Triển khai Website điều khiển trên Vercel (cho người làm thay không cần dùng GitHub)
+
+Thư mục `web/` chứa giao diện điều khiển tiếng Việt (bật/tắt lịch, bấm chạy tay, xem log trực tiếp, tải báo cáo Excel) chạy qua Vercel Serverless Functions:
+
+1. Tạo một **Fine-grained Personal Access Token** trên GitHub cho riêng repo `tool_DSP` với quyền **`Actions: Read and write`** (và `Metadata: Read-only`).
+2. Vào [vercel.com/new](https://vercel.com/new) → Import repo `MinhHieu-Tapcode/tool_DSP`:
+   - **Root Directory:** chọn `web`
+   - **Environment Variables:** thêm:
+     - `GITHUB_TOKEN` = token vừa tạo
+     - `APP_PASSWORD` = mật khẩu đăng nhập web bạn tự đặt để đưa cho người làm thay
+     - *(Tùy chọn)* `GITHUB_OWNER` = `MinhHieu-Tapcode`, `GITHUB_REPO` = `tool_DSP`
+3. Bấm **Deploy** — gửi link Vercel + `APP_PASSWORD` là đồng nghiệp dùng được ngay trên mọi trình duyệt / điện thoại.
+
+---
+
+## 7. Chạy Unit Test kiểm tra Rule
 ```powershell
 python -m unittest discover -s . -v
 ```
