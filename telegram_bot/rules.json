@@ -1,0 +1,24 @@
+{
+  "enabled": true,
+  "allowed_chat_ids": [
+    "-5482707500"
+  ],
+  "default_typing_delay_sec": 1.2,
+  "log_unmatched_senders": true,
+  "rules": [
+    {
+      "name": "xu_ly_data",
+      "enabled": true,
+      "allowed_users": [],
+      "match_mode": "exact",
+      "phrases": [
+        "anh xu ly data giup em nhe",
+        "a xu ly data giup em nhe",
+        "anh xu ly data giup em nha",
+        "a xu ly data giup em nha"
+      ],
+      "reply": "Vâng ạ 😊",
+      "reply_to_message": true
+    }
+  ]
+}
