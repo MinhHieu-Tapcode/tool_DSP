@@ -82,9 +82,12 @@ class ClassifierHelperTests(unittest.TestCase):
     def test_test_keyword_avoids_false_positives(self) -> None:
         self.assertEqual(detect_test_text(["Latest edition jacket"])[0], "NONE")
         self.assertEqual(detect_test_text(["Greatest waterproof tarp"])[0], "NONE")
+        self.assertEqual(detect_test_text(["Buy 1 <12V CAR BATTERY TESTER ALTERNATOR TOOL>"])[0], "NONE")
+        self.assertEqual(detect_test_text(["testing order"])[0], "NONE")
+        self.assertEqual(detect_test_text(["retest customer"])[0], "NONE")
         self.assertEqual(detect_test_text(["link: https://example.com/p?utm_campaign=MT04+TEST"])[0], "NONE")
         self.assertEqual(detect_test_text(["Test Buyer 123"])[0], "DEFINITE")
-        self.assertEqual(detect_test_text(["testing order"])[0], "DEFINITE")
+        self.assertEqual(detect_test_text(["test"])[0], "DEFINITE")
 
     def test_product_matching_across_variants(self) -> None:
         a = OrderRecord(
@@ -809,20 +812,25 @@ class Gip287ClassificationTests(unittest.TestCase):
                 status="New",
             ),
             OrderRecord(
-                id="AMBIG_1",
+                id="TESTER_1",
                 shop="GIP 287",
                 customer_name="Juan",
+                internal_note="Buy 1 <12V CAR BATTERY TESTER ALTERNATOR TOOL>",
+                status="New",
+            ),
+            OrderRecord(
+                id="RETEST_1",
+                shop="GIP 287",
+                customer_name="Pedro",
                 note="retest customer",
                 status="New",
             ),
         ]
         res = classify_gip287_phase1_test_orders(orders)
         by_id = {r.order.id: r for r in res}
-        self.assertEqual(set(by_id.keys()), {"A558587", "AMBIG_1"})
+        self.assertEqual(set(by_id.keys()), {"A558587"})
         self.assertEqual(by_id["A558587"].bucket, "TEST")
         self.assertEqual(by_id["A558587"].action, "CANCEL")
-        self.assertEqual(by_id["AMBIG_1"].bucket, "AMBIGUOUS")
-        self.assertEqual(by_id["AMBIG_1"].action, "REVIEW")
 
 
 if __name__ == "__main__":

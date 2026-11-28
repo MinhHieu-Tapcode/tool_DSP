@@ -57,31 +57,6 @@ _COLOR_WORDS = (
     "khaki",
 )
 
-_SAFE_TEST_SUBSTRINGS = {
-    "latest",
-    "greatest",
-    "fastest",
-    "shortest",
-    "highest",
-    "lowest",
-    "hottest",
-    "cutest",
-    "smartest",
-    "sweetest",
-    "brightest",
-    "softest",
-    "lightest",
-    "tightest",
-    "strictest",
-    "contest",
-    "protest",
-    "attest",
-    "detest",
-    "testimony",
-    "testimonial",
-    "intestine",
-}
-
 _GIP_CODE_RE = re.compile(r"\bGIP\s*(\d+)\b", re.IGNORECASE)
 _SKU_RE = re.compile(r"\bGPH\d+-\d+\b", re.IGNORECASE)
 _ANGLE_PRODUCT_RE = re.compile(r"<([^<>]{2,100})>")
@@ -109,8 +84,7 @@ _COLOR_RE = re.compile(
     re.IGNORECASE,
 )
 _CODE_SUFFIX_RE = re.compile(r"\s*-\s*D\d+\b", re.IGNORECASE)
-_DEFINITE_TEST_RE = re.compile(r"(?:\btest(?:ing|ed|s)?\d*\b|\b\d*test\b)", re.IGNORECASE)
-_ANY_TEST_TOKEN_RE = re.compile(r"\b[a-z0-9_]*test[a-z0-9_]*\b", re.IGNORECASE)
+_DEFINITE_TEST_RE = re.compile(r"\btest\b", re.IGNORECASE)
 _STRIP_URL_RE = re.compile(r"https?://\S+", re.IGNORECASE)
 
 
@@ -273,8 +247,7 @@ def is_order_younger_than(
 
 
 def detect_test_text(texts: Iterable[str]) -> Tuple[str, str]:
-    """Check strings for TEST indicator -> ('DEFINITE'|'AMBIGUOUS'|'NONE', matched_snippet)."""
-    ambiguous_hit = ""
+    """Check strings for standalone 'test' keyword -> ('DEFINITE'|'NONE', matched_snippet)."""
     for raw in texts:
         s = _STRIP_URL_RE.sub(" ", (raw or "")).strip()
         if not s:
@@ -282,12 +255,6 @@ def detect_test_text(texts: Iterable[str]) -> Tuple[str, str]:
         m_def = _DEFINITE_TEST_RE.search(s)
         if m_def:
             return "DEFINITE", f"{m_def.group(0)} in '{s[:80]}'"
-        for tok in _ANY_TEST_TOKEN_RE.findall(s):
-            low = tok.lower()
-            if low not in _SAFE_TEST_SUBSTRINGS and not ambiguous_hit:
-                ambiguous_hit = f"{tok} in '{s[:80]}'"
-    if ambiguous_hit:
-        return "AMBIGUOUS", ambiguous_hit
     return "NONE", ""
 
 
