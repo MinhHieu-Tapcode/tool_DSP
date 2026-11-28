@@ -259,19 +259,11 @@ def detect_test_text(texts: Iterable[str]) -> Tuple[str, str]:
 
 
 def has_test_order_flag(order: OrderRecord) -> Tuple[str, str]:
-    """Check whether a single order has an explicit TEST tag or test text."""
+    """Check whether a single order has an explicit TEST tag or standalone 'test' in customer name."""
     for tag in order.tags:
         if tag.strip().upper() == "TEST":
             return "DEFINITE", "Tag TEST"
-    return detect_test_text(
-        [
-            order.customer_name,
-            order.address,
-            order.note,
-            order.internal_note,
-            order.note_print,
-        ]
-    )
+    return detect_test_text([order.customer_name])
 
 
 def _normalize_product_name(name: str) -> str:

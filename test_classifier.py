@@ -819,6 +819,13 @@ class Gip287ClassificationTests(unittest.TestCase):
                 status="New",
             ),
             OrderRecord(
+                id="TEST_STRIPS_1",
+                shop="GIP 287",
+                customer_name="Ana",
+                internal_note="Buy 1 <BLOOD SUGAR TEST STRIPS>",
+                status="New",
+            ),
+            OrderRecord(
                 id="RETEST_1",
                 shop="GIP 287",
                 customer_name="Pedro",
