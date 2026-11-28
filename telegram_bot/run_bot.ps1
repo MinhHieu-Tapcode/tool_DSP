@@ -110,10 +110,10 @@ switch ($Action) {
     "register" {
         $arg = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command `"Set-Location '$RootDir'; & '$PythonExe' -u -m telegram_bot.bot`""
         $act = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $arg -WorkingDirectory $RootDir
-        $trig = New-ScheduledTaskTrigger -AtLogOn
+        $trig = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 5)
         $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit ([TimeSpan]::Zero)
-        Register-ScheduledTask -TaskName $TaskName -Action $act -Trigger $trig -Settings $settings -Force | Out-Null
-        Write-Host "Da dang ky task '$TaskName' (tu bat khi dang nhap Windows)."
+        Register-ScheduledTask -TaskName $TaskName -Action $act -Trigger $trig -Settings $settings -Force -ErrorAction Stop | Out-Null
+        Write-Host "Da dang ky task '$TaskName' (tu giu ket noi chay ngam moi 5 phut)."
     }
 
     "unregister" {
