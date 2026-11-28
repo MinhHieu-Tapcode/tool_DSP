@@ -4,7 +4,15 @@ from __future__ import annotations
 
 import unittest
 
-from telegram_bot.bot import DEFAULT_RULES_PATH, load_rules, match_rule, normalize_vn, sender_matches, text_matches
+from telegram_bot.bot import (
+    DEFAULT_RULES_PATH,
+    load_rules,
+    match_rule,
+    normalize_vn,
+    render_template,
+    sender_matches,
+    text_matches,
+)
 
 
 class TelegramBotRuleTests(unittest.TestCase):
@@ -65,6 +73,21 @@ class TelegramBotRuleTests(unittest.TestCase):
         self.assertIsNotNone(match_rule("-5482707500", sender, "a xử lý data giúp em nha", cfg))
         self.assertIsNone(match_rule("-5482707500", sender, "Tool check trùng à :)))", cfg))
         self.assertIsNone(match_rule("-5482707500", sender, "hnhu tool ăn theo chữ check trùng", cfg))
+
+    def test_render_update_link_template_mentions(self) -> None:
+        cfg = load_rules(DEFAULT_RULES_PATH)
+        txt1, pm1 = render_template("update_link", cfg, tag="@gipsupport")
+        self.assertIsNone(pm1)
+        self.assertIn("Chị @gipsupport ơi, em vừa update thông tin mới vào link, chị check link giúp em với ạ", txt1)
+        self.assertIn("https://docs.google.com/spreadsheets/d/10Zoz39Ltskaw94AkSCGqCJce1X7jaHfBB2nbefLSZUw/edit", txt1)
+
+        txt2, pm2 = render_template("update_link", cfg, tag="gipsupport")
+        self.assertEqual(txt1, txt2)
+        self.assertIsNone(pm2)
+
+        txt_html, pm_html = render_template("update_link", cfg, tag="Tuyết", user_id="987654321")
+        self.assertEqual(pm_html, "HTML")
+        self.assertIn('<a href="tg://user?id=987654321">Tuyết</a>', txt_html)
 
 
 if __name__ == "__main__":

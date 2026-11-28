@@ -20,5 +20,11 @@
       "reply": "Vâng ạ 😊",
       "reply_to_message": true
     }
-  ]
+  ],
+  "templates": {
+    "update_link": {
+      "text": "Chị {tag} ơi, em vừa update thông tin mới vào link, chị check link giúp em với ạ\n{link}",
+      "default_link": "https://docs.google.com/spreadsheets/d/10Zoz39Ltskaw94AkSCGqCJce1X7jaHfBB2nbefLSZUw/edit"
+    }
+  }
 }
