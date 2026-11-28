@@ -255,6 +255,25 @@ def _format_sender_tag(sender: Dict[str, Any]) -> str:
     return f"{full} (id={uid}, @{uname or '-'})"
 
 
+def _send_typing_for(session: requests.Session, token: str, chat_id: str, total_sec: float) -> None:
+    """Keep Telegram 'typing...' indicator alive for total_sec by refreshing every 4s."""
+    remaining = min(max(total_sec, 0.0), 60.0)
+    while remaining > 0:
+        try:
+            _tg_request(
+                session,
+                token,
+                "sendChatAction",
+                {"chat_id": chat_id, "action": "typing"},
+                timeout=10,
+            )
+        except Exception:
+            pass
+        step = min(remaining, 4.0)
+        time.sleep(step)
+        remaining -= step
+
+
 def run_polling(rules_path: Path, dry_run: bool, logger: logging.Logger) -> int:
     load_dotenv()
     token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
@@ -366,17 +385,7 @@ def run_polling(rules_path: Path, dry_run: bool, logger: logging.Logger) -> int:
 
                 delay = float(matched.get("typing_delay_sec", rules_cfg.get("default_typing_delay_sec", 0)) or 0)
                 if delay > 0:
-                    try:
-                        _tg_request(
-                            session,
-                            token,
-                            "sendChatAction",
-                            {"chat_id": chat_id, "action": "typing"},
-                            timeout=10,
-                        )
-                    except Exception:
-                        pass
-                    time.sleep(min(delay, 5.0))
+                    _send_typing_for(session, token, chat_id, delay)
 
                 send_payload: Dict[str, Any] = {"chat_id": chat_id, "text": reply_text}
                 if matched.get("reply_to_message", True) and msg.get("message_id") is not None:

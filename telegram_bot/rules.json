@@ -3,7 +3,7 @@
   "allowed_chat_ids": [
     "-5482707500"
   ],
-  "default_typing_delay_sec": 1.2,
+  "default_typing_delay_sec": 10,
   "log_unmatched_senders": true,
   "rules": [
     {
