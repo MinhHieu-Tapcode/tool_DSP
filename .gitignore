@@ -1,5 +1,6 @@
 .env
 storage_state.json
+pancake_storage_state.json
 *.lock
 *.tmp
 reports/

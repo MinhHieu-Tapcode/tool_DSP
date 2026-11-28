@@ -100,12 +100,17 @@ class TelegramBotRuleTests(unittest.TestCase):
         cfg = copy.deepcopy(load_rules(DEFAULT_RULES_PATH))
         rem = cfg["scheduled_reminders"][0]
         self.assertTrue(rem["enabled"])
+        self.assertFalse(rem.get("auto_send_on_schedule", True))
         self.assertEqual(rem["primary_mention"]["user_id"], "7374545108")
 
-        # Setting enabled=False suppresses firing
+        # Update-first guard: default auto_send_on_schedule=False must NOT blind-send at 08:00
+        t_0800 = datetime(2026, 11, 29, 8, 1, 0, tzinfo=TZ_VN)
+        self.assertEqual(evaluate_scheduled_reminders(cfg, {"reminders": {}}, t_0800), [])
+
+        # Setting auto_send_on_schedule=True enables pure timer firing; enabled=False suppresses it
+        rem["auto_send_on_schedule"] = True
         cfg_off = copy.deepcopy(cfg)
         cfg_off["scheduled_reminders"][0]["enabled"] = False
-        t_0800 = datetime(2026, 11, 29, 8, 1, 0, tzinfo=TZ_VN)
         self.assertEqual(evaluate_scheduled_reminders(cfg_off, {"reminders": {}}, t_0800), [])
 
         state = {"reminders": {}}

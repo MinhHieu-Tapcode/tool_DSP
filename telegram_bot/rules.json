@@ -28,6 +28,7 @@
     {
       "id": "gip306_update_link",
       "enabled": true,
+      "auto_send_on_schedule": false,
       "chat_id": "-5474079036",
       "times_vn": [
         "08:00",
