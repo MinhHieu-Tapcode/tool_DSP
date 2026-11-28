@@ -28,6 +28,7 @@ TZ_VN = timezone(timedelta(hours=7))
 DEFAULT_RULES_PATH = BOT_DIR / "rules.json"
 LOCK_PATH = BOT_DIR / "telegram_bot.lock"
 LOG_PATH = LOGS_DIR / "telegram_bot.log"
+SCHEDULE_STATE_PATH = LOGS_DIR / "telegram_schedule_state.json"
 
 
 def normalize_vn(text: str) -> str:
@@ -103,17 +104,165 @@ def match_rule(
     if sender.get("is_bot") or (bot_id is not None and sender.get("id") == bot_id):
         return None
 
-    allowed_chats = {str(c).strip() for c in rules_cfg.get("allowed_chat_ids", []) if str(c).strip()}
-    if not allowed_chats or str(chat_id).strip() not in allowed_chats:
-        return None
+    global_chats = {str(c).strip() for c in rules_cfg.get("allowed_chat_ids", []) if str(c).strip()}
+    cid = str(chat_id).strip()
 
     for rule in rules_cfg.get("rules", []):
         if not isinstance(rule, dict) or not rule.get("enabled", True):
+            continue
+        rule_chats = {str(c).strip() for c in rule.get("chat_ids", []) if str(c).strip()} or global_chats
+        if not rule_chats or cid not in rule_chats:
             continue
         if not sender_matches(sender, rule.get("allowed_users", [])):
             continue
         if text_matches(text, rule.get("phrases", []), rule.get("match_mode", "exact")):
             return rule
+    return None
+
+
+def format_person_mention(spec: Optional[Dict[str, Any]]) -> str:
+    """Format a Telegram person spec ({label, user_id, username}) as HTML mention or @username."""
+    if not isinstance(spec, dict):
+        return ""
+    label = str(spec.get("label") or "").strip()
+    user_id = str(spec.get("user_id") or "").strip()
+    username = str(spec.get("username") or "").strip()
+    if user_id:
+        display = html.escape(label or username.lstrip("@") or user_id)
+        return f'<a href="tg://user?id={html.escape(user_id, quote=True)}">{display}</a>'
+    if username:
+        uname = username if username.startswith("@") else f"@{username}"
+        return html.escape(uname)
+    return html.escape(label)
+
+
+def render_reminder_message(rem: Dict[str, Any], is_escalation: bool = False) -> Tuple[str, str]:
+    """Render an initial or escalated scheduled reminder message as Telegram HTML."""
+    tpl_key = "escalation_template" if is_escalation else "initial_template"
+    raw_tpl = str(rem.get(tpl_key) or "")
+    primary_html = format_person_mention(rem.get("primary_mention"))
+    esc_html = format_person_mention(rem.get("escalation_mention"))
+    link_html = html.escape(str(rem.get("link") or "").strip())
+    rendered = (
+        html.escape(raw_tpl)
+        .replace("{primary}", primary_html)
+        .replace("{escalation}", esc_html)
+        .replace("{link}", link_html)
+    )
+    return rendered, "HTML"
+
+
+def _load_schedule_state(state_path: Path = SCHEDULE_STATE_PATH) -> Dict[str, Any]:
+    if not state_path.exists():
+        return {"reminders": {}}
+    try:
+        data = json.loads(state_path.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            data.setdefault("reminders", {})
+            return data
+    except Exception:
+        pass
+    return {"reminders": {}}
+
+
+def _save_schedule_state(state_data: Dict[str, Any], state_path: Path = SCHEDULE_STATE_PATH) -> None:
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    state_path.write_text(json.dumps(state_data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def evaluate_scheduled_reminders(
+    rules_cfg: Dict[str, Any],
+    state_data: Dict[str, Any],
+    now_vn: datetime,
+) -> List[Dict[str, Any]]:
+    """Return due scheduled reminder/escalation actions and update state_data in place."""
+    if not rules_cfg.get("enabled", True):
+        return []
+    actions: List[Dict[str, Any]] = []
+    reminders_state = state_data.setdefault("reminders", {})
+
+    for rem in rules_cfg.get("scheduled_reminders", []):
+        if not isinstance(rem, dict) or not rem.get("enabled", False):
+            continue
+        rem_id = str(rem.get("id") or "").strip()
+        chat_id = str(rem.get("chat_id") or "").strip()
+        if not rem_id or not chat_id:
+            continue
+
+        rstate = reminders_state.setdefault(rem_id, {"sent_slots": [], "pending_escalation": None})
+        sent_slots: List[str] = rstate.setdefault("sent_slots", [])
+        window_min = int(rem.get("fire_window_minutes", 10) or 10)
+        esc_min = int(rem.get("escalation_after_minutes", 60) or 0)
+
+        for hhmm in rem.get("times_vn", []):
+            m = re.match(r"^\s*(\d{1,2}):(\d{2})\s*$", str(hhmm))
+            if not m:
+                continue
+            hh, mm = int(m.group(1)), int(m.group(2))
+            slot_dt = now_vn.replace(hour=hh, minute=mm, second=0, microsecond=0)
+            slot_key = f"{now_vn.strftime('%Y-%m-%d')}@{hh:02d}:{mm:02d}"
+            elapsed = (now_vn - slot_dt).total_seconds()
+            if 0 <= elapsed < window_min * 60 and slot_key not in sent_slots:
+                sent_slots.append(slot_key)
+                if len(sent_slots) > 20:
+                    del sent_slots[:-20]
+                if esc_min > 0:
+                    rstate["pending_escalation"] = {
+                        "slot_key": slot_key,
+                        "sent_at": now_vn.isoformat(),
+                        "escalate_at": (now_vn + timedelta(minutes=esc_min)).isoformat(),
+                    }
+                else:
+                    rstate["pending_escalation"] = None
+                actions.append({"reminder": rem, "kind": "initial", "slot_key": slot_key})
+                break
+
+        pending = rstate.get("pending_escalation")
+        if isinstance(pending, dict) and pending.get("escalate_at"):
+            try:
+                esc_dt = datetime.fromisoformat(pending["escalate_at"])
+            except ValueError:
+                esc_dt = None
+            if esc_dt is not None and now_vn >= esc_dt:
+                slot_key = str(pending.get("slot_key") or "")
+                rstate["pending_escalation"] = None
+                actions.append({"reminder": rem, "kind": "escalation", "slot_key": slot_key})
+
+    return actions
+
+
+def match_reminder_ack(
+    chat_id: str,
+    sender: Optional[Dict[str, Any]],
+    text: str,
+    rules_cfg: Dict[str, Any],
+    state_data: Dict[str, Any],
+    bot_id: Optional[int] = None,
+) -> Optional[Dict[str, Any]]:
+    """Match an acknowledgment inside a reminder chat and clear pending escalation if matched."""
+    if not rules_cfg.get("enabled", True) or not isinstance(sender, dict):
+        return None
+    if sender.get("is_bot") or (bot_id is not None and sender.get("id") == bot_id):
+        return None
+
+    cid = str(chat_id).strip()
+    reminders_state = state_data.setdefault("reminders", {})
+
+    for rem in rules_cfg.get("scheduled_reminders", []):
+        if not isinstance(rem, dict) or not rem.get("enabled", False):
+            continue
+        if str(rem.get("chat_id") or "").strip() != cid:
+            continue
+        rem_id = str(rem.get("id") or "").strip()
+        for ack in rem.get("ack_rules", []):
+            if not isinstance(ack, dict) or not ack.get("enabled", True):
+                continue
+            if not sender_matches(sender, ack.get("allowed_users", [])):
+                continue
+            if text_matches(text, ack.get("phrases", []), ack.get("match_mode", "exact")):
+                if rem_id and rem_id in reminders_state:
+                    reminders_state[rem_id]["pending_escalation"] = None
+                return ack
     return None
 
 
@@ -283,20 +432,23 @@ def run_polling(rules_path: Path, dry_run: bool, logger: logging.Logger) -> int:
 
     rules_cfg = load_rules(rules_path)
     last_mtime = rules_path.stat().st_mtime
+    sched_state = _load_schedule_state()
 
     session = requests.Session()
     me = _tg_request(session, token, "getMe", timeout=15)["result"]
     bot_id = me.get("id")
     username = me.get("username")
     can_read_all = me.get("can_read_all_group_messages")
+    active_rems = sum(1 for r in rules_cfg.get("scheduled_reminders", []) if r.get("enabled"))
     logger.info(
-        "Bot sẵn sàng (%s): @%s | can_read_all_group_messages=%s | enabled=%s | chats=%s | rules=%d",
+        "Bot sẵn sàng (%s): @%s | can_read_all_group_messages=%s | enabled=%s | chats=%s | rules=%d | reminders_on=%d",
         "DRY-RUN" if dry_run else "LIVE",
         username,
         can_read_all,
         rules_cfg.get("enabled", True),
         rules_cfg.get("allowed_chat_ids", []),
         len(rules_cfg.get("rules", [])),
+        active_rems,
     )
 
     offset: Optional[int] = None
@@ -333,10 +485,38 @@ def run_polling(rules_path: Path, dry_run: bool, logger: logging.Logger) -> int:
             except Exception as exc:
                 logger.warning("Lỗi đọc lại %s (giữ cấu hình cũ): %s", rules_path.name, exc)
 
-            params: Dict[str, Any] = {"timeout": 25, "allowed_updates": ["message"]}
+            # 1) Check scheduled 08:00 / 13:30 reminders and 60-minute escalations
+            due_actions = evaluate_scheduled_reminders(rules_cfg, sched_state, datetime.now(TZ_VN))
+            if due_actions:
+                for act in due_actions:
+                    rem = act["reminder"]
+                    is_esc = act["kind"] == "escalation"
+                    rem_chat = str(rem.get("chat_id") or "").strip()
+                    msg_text, pmode = render_reminder_message(rem, is_escalation=is_esc)
+                    logger.info(
+                        "[Lịch %s (%s) -> %s slot=%s]: %s",
+                        rem.get("id"),
+                        act["kind"],
+                        rem_chat,
+                        act.get("slot_key"),
+                        msg_text,
+                    )
+                    if not dry_run:
+                        _tg_request(
+                            session,
+                            token,
+                            "sendMessage",
+                            {"chat_id": rem_chat, "text": msg_text, "parse_mode": pmode},
+                            timeout=15,
+                        )
+                if not dry_run:
+                    _save_schedule_state(sched_state)
+
+            # 2) Long-poll incoming messages (15s timeout so timers fire promptly)
+            params: Dict[str, Any] = {"timeout": 15, "allowed_updates": ["message"]}
             if offset is not None:
                 params["offset"] = offset
-            res = _tg_request(session, token, "getUpdates", params, timeout=35)
+            res = _tg_request(session, token, "getUpdates", params, timeout=25)
 
             for upd in res.get("result", []):
                 offset = upd["update_id"] + 1
@@ -347,16 +527,23 @@ def run_polling(rules_path: Path, dry_run: bool, logger: logging.Logger) -> int:
                 if sender.get("is_bot") or (bot_id is not None and sender.get("id") == bot_id):
                     continue
                 chat_id = str((msg.get("chat") or {}).get("id", ""))
-                allowed_chats: Set[str] = {
+                monitored_chats: Set[str] = {
                     str(c).strip() for c in rules_cfg.get("allowed_chat_ids", []) if str(c).strip()
                 }
-                if chat_id not in allowed_chats:
+                for rem in rules_cfg.get("scheduled_reminders", []):
+                    if isinstance(rem, dict) and rem.get("enabled", False) and rem.get("chat_id"):
+                        monitored_chats.add(str(rem["chat_id"]).strip())
+                if chat_id not in monitored_chats:
                     continue
                 text = _extract_message_text(msg)
                 if not text:
                     continue
 
-                matched = match_rule(chat_id, sender, text, rules_cfg, bot_id=bot_id)
+                matched = match_reminder_ack(chat_id, sender, text, rules_cfg, sched_state, bot_id=bot_id)
+                if matched is not None and not dry_run:
+                    _save_schedule_state(sched_state)
+                if matched is None:
+                    matched = match_rule(chat_id, sender, text, rules_cfg, bot_id=bot_id)
                 if not matched:
                     if rules_cfg.get("log_unmatched_senders", True):
                         logger.info(

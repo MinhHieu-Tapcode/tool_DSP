@@ -9,6 +9,9 @@
     {
       "name": "xu_ly_data",
       "enabled": true,
+      "chat_ids": [
+        "-5482707500"
+      ],
       "allowed_users": [],
       "match_mode": "exact",
       "phrases": [
@@ -19,6 +22,64 @@
       ],
       "reply": "dạ vâng ạ",
       "reply_to_message": true
+    }
+  ],
+  "scheduled_reminders": [
+    {
+      "id": "gip306_update_link",
+      "enabled": false,
+      "chat_id": "-5474079036",
+      "times_vn": [
+        "08:00",
+        "13:30"
+      ],
+      "fire_window_minutes": 10,
+      "link": "https://docs.google.com/spreadsheets/d/10Zoz39Ltskaw94AkSCGqCJce1X7jaHfBB2nbefLSZUw/edit?gid=398217873#gid=398217873",
+      "primary_mention": {
+        "label": "Tuyết",
+        "user_id": "",
+        "username": ""
+      },
+      "escalation_after_minutes": 60,
+      "escalation_mention": {
+        "label": "Thảo",
+        "user_id": "",
+        "username": "@SA_ThaoNT18"
+      },
+      "initial_template": "Chị {primary} ơi, em vừa update thông tin mới vào link, chị check link giúp em với ạ\n{link}",
+      "escalation_template": "Chị {primary} {escalation} ơi, em vừa update thông tin mới vào link, chị check link giúp em với ạ\n{link}",
+      "ack_rules": [
+        {
+          "name": "tuyet_ack",
+          "enabled": true,
+          "allowed_users": [
+            "Tuyết Nhung"
+          ],
+          "match_mode": "exact",
+          "phrases": [
+            "anh xu ly data giup em nhe",
+            "a xu ly data giup em nhe",
+            "anh xu ly data giup em nha",
+            "a xu ly data giup em nha"
+          ],
+          "reply": "dạ vâng ạ",
+          "reply_to_message": true
+        },
+        {
+          "name": "thao_ack",
+          "enabled": true,
+          "allowed_users": [
+            "@SA_ThaoNT18"
+          ],
+          "match_mode": "exact",
+          "phrases": [
+            "em chia cho sale nhe",
+            "em chia cho sale nha"
+          ],
+          "reply": "dạ vâng ạ",
+          "reply_to_message": true
+        }
+      ]
     }
   ],
   "templates": {

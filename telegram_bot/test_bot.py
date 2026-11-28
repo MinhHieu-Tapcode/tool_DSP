@@ -2,17 +2,24 @@
 
 from __future__ import annotations
 
+import copy
 import unittest
+from datetime import datetime, timedelta, timezone
 
 from telegram_bot.bot import (
     DEFAULT_RULES_PATH,
+    evaluate_scheduled_reminders,
     load_rules,
+    match_reminder_ack,
     match_rule,
     normalize_vn,
+    render_reminder_message,
     render_template,
     sender_matches,
     text_matches,
 )
+
+TZ_VN = timezone(timedelta(hours=7))
 
 
 class TelegramBotRuleTests(unittest.TestCase):
@@ -88,6 +95,78 @@ class TelegramBotRuleTests(unittest.TestCase):
         txt_html, pm_html = render_template("update_link", cfg, tag="Tuyết", user_id="987654321")
         self.assertEqual(pm_html, "HTML")
         self.assertIn('<a href="tg://user?id=987654321">Tuyết</a>', txt_html)
+
+    def test_scheduled_reminders_0800_1330_escalation_and_lada_guard(self) -> None:
+        cfg = copy.deepcopy(load_rules(DEFAULT_RULES_PATH))
+        # Default rules.json keeps gip306_update_link disabled until user supplies Tuyet user_id
+        state_disabled = {"reminders": {}}
+        t_0800 = datetime(2026, 11, 29, 8, 1, 0, tzinfo=TZ_VN)
+        self.assertEqual(evaluate_scheduled_reminders(cfg, state_disabled, t_0800), [])
+
+        # Enable with test user_id for Tuyet
+        rem = cfg["scheduled_reminders"][0]
+        rem["enabled"] = True
+        rem["primary_mention"]["user_id"] = "777888999"
+
+        state = {"reminders": {}}
+        # Before 08:00 -> nothing
+        self.assertEqual(
+            evaluate_scheduled_reminders(cfg, state, datetime(2026, 11, 29, 7, 59, 0, tzinfo=TZ_VN)),
+            [],
+        )
+        # 08:01 -> fires initial once, sets 60-min escalation
+        acts = evaluate_scheduled_reminders(cfg, state, t_0800)
+        self.assertEqual(len(acts), 1)
+        self.assertEqual(acts[0]["kind"], "initial")
+        init_txt, pmode = render_reminder_message(acts[0]["reminder"], is_escalation=False)
+        self.assertEqual(pmode, "HTML")
+        self.assertIn('<a href="tg://user?id=777888999">Tuyết</a>', init_txt)
+        self.assertNotIn("@SA_ThaoNT18", init_txt)
+
+        # Duplicate check at 08:02 -> does not double-fire
+        self.assertEqual(
+            evaluate_scheduled_reminders(cfg, state, datetime(2026, 11, 29, 8, 2, 0, tzinfo=TZ_VN)),
+            [],
+        )
+        # At 08:59 -> escalation not due yet
+        self.assertEqual(
+            evaluate_scheduled_reminders(cfg, state, datetime(2026, 11, 29, 8, 59, 0, tzinfo=TZ_VN)),
+            [],
+        )
+        # At 09:01 (>= 60 min later, still unacknowledged) -> fires escalation with both Tuyet & @SA_ThaoNT18
+        esc_acts = evaluate_scheduled_reminders(cfg, state, datetime(2026, 11, 29, 9, 1, 0, tzinfo=TZ_VN))
+        self.assertEqual(len(esc_acts), 1)
+        self.assertEqual(esc_acts[0]["kind"], "escalation")
+        esc_txt, _ = render_reminder_message(esc_acts[0]["reminder"], is_escalation=True)
+        self.assertIn('<a href="tg://user?id=777888999">Tuyết</a> @SA_ThaoNT18', esc_txt)
+
+        # Afternoon 13:30 slot fires; Tuyet replies "Anh xử lý data giúp em nhé" -> cancels escalation
+        t_1330 = datetime(2026, 11, 29, 13, 32, 0, tzinfo=TZ_VN)
+        pm_acts = evaluate_scheduled_reminders(cfg, state, t_1330)
+        self.assertEqual(len(pm_acts), 1)
+        self.assertEqual(pm_acts[0]["kind"], "initial")
+
+        tuyet = {"id": 777888999, "first_name": "Tuyết Nhung", "is_bot": False}
+        # Lada's phrase ("Chị xử lý data giúp em nhé") MUST be ignored!
+        self.assertIsNone(match_reminder_ack("-5474079036", tuyet, "Chị xử lý data giúp em nhé", cfg, state))
+        # Tuyet's phrase for Minh ("Anh xử lý data giúp em nhé") matches & clears escalation
+        ack = match_reminder_ack("-5474079036", tuyet, "Anh xử lý data giúp em nhé", cfg, state)
+        self.assertIsNotNone(ack)
+        self.assertEqual(ack["reply"], "dạ vâng ạ")
+        # 60+ minutes later at 14:35 -> no escalation because Tuyet already acknowledged
+        self.assertEqual(
+            evaluate_scheduled_reminders(cfg, state, datetime(2026, 11, 29, 14, 35, 0, tzinfo=TZ_VN)),
+            [],
+        )
+
+        # Thao's phrase ("Em chia cho sale nhé") also matches for @SA_ThaoNT18
+        thao = {"id": 555444, "username": "SA_ThaoNT18", "first_name": "Thảo Nguyễn", "is_bot": False}
+        ack_thao = match_reminder_ack("-5474079036", thao, "Em chia cho sale nhé", cfg, state)
+        self.assertIsNotNone(ack_thao)
+        self.assertEqual(ack_thao["reply"], "dạ vâng ạ")
+
+        # Per-rule chat_ids isolation: general xu_ly_data does not bleed into -5474079036
+        self.assertIsNone(match_rule("-5474079036", tuyet, "anh xử lý data giúp em nhé", cfg))
 
 
 if __name__ == "__main__":
