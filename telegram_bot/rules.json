@@ -27,7 +27,7 @@
   "scheduled_reminders": [
     {
       "id": "gip306_update_link",
-      "enabled": false,
+      "enabled": true,
       "chat_id": "-5474079036",
       "times_vn": [
         "08:00",
@@ -37,7 +37,7 @@
       "link": "https://docs.google.com/spreadsheets/d/10Zoz39Ltskaw94AkSCGqCJce1X7jaHfBB2nbefLSZUw/edit?gid=398217873#gid=398217873",
       "primary_mention": {
         "label": "Tuyết",
-        "user_id": "",
+        "user_id": "7374545108",
         "username": ""
       },
       "escalation_after_minutes": 60,
@@ -53,6 +53,7 @@
           "name": "tuyet_ack",
           "enabled": true,
           "allowed_users": [
+            "7374545108",
             "Tuyết Nhung"
           ],
           "match_mode": "exact",
